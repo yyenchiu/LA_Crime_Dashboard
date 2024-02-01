@@ -24,8 +24,8 @@ server = app.server
 # ---------------------------------------------------------------------------------------
 # Import cleaned data
 
-crime_clean = pd.read_csv("crime_present_clean.csv")
-arrest_clean = pd.read_csv("arrest_present_clean.csv")
+crime_clean = pd.read_csv("crime_clean_2017.csv")
+arrest_clean = pd.read_csv("arrest_clean_2017.csv")
 map_info = pd.read_csv("map_info_more_detailed_present.csv")
 map_gj = json.load(open("LAPD_Divisions.geojson", "r"))
 
@@ -93,15 +93,7 @@ app.layout = html.Div([
                            ),
               html.Br(),
               dcc.RangeSlider(2010, 2023, 1, count=1,
-                              marks={2010: "2010",
-                                     2011: "2011",
-                                     2012: "2012",
-                                     2013: "2013",
-                                     2014: "2014",
-                                     2015: "2015",
-                                     2016: "2016",
-                                     2017: "2017",
-                                     2018: "2018",
+                              marks={2018: "2018",
                                      2019: "2019",
                                      2020: "2020",
                                      2021: "2021",
