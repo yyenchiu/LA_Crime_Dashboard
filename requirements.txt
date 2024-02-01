@@ -1,4 +1,7 @@
+numpy
+pandas
+json
+plotly
 dash==2.9.2
 wordcloud
-pandas
 gunicorn
