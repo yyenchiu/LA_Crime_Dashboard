@@ -1,2 +1,2 @@
 # LA_Crime_Dashboard
-Generate an interactive dashboard that visualizes data on criminal activity and police arrests in Los Angeles from 2010-2023.
+Generate an interactive dashboard using Plotly Dash that visualizes data on criminal activity and police arrests in Los Angeles from 2010 to July 2023.
