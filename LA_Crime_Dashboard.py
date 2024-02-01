@@ -17,6 +17,7 @@ external_stylesheets = {
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'}
 
 app = dash.Dash(__name__)
+server = app.server
 
 # bootstrap themes: bootswatch.com
 
