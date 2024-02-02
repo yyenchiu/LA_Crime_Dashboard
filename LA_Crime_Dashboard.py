@@ -13,25 +13,22 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
+
 external_stylesheets = {
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'}
 
 app = dash.Dash(__name__)
-server = app.server
 
 # bootstrap themes: bootswatch.com
 
 # ---------------------------------------------------------------------------------------
 # Import cleaned data
 
-crime_clean = pd.read_csv("crime_clean_2017.csv")
-arrest_clean = pd.read_csv("arrest_clean_2017.csv")
+crime_clean = pd.read_csv("crime_present_clean.csv")
 map_info = pd.read_csv("map_info_more_detailed_present.csv")
 map_gj = json.load(open("LAPD_Divisions.geojson", "r"))
 
-arrest_clean["AREA_NAME"] = arrest_clean.AREA_NAME.apply(lambda x: x.upper())
 crime_clean["AREA_NAME"] = crime_clean.AREA_NAME.apply(lambda x: x.upper())
-arrest_clean.replace({"WEST LA": "WEST LOS ANGELES", "N HOLLYWOOD": "NORTH HOLLYWOOD"}, inplace=True)
 crime_clean.replace({"WEST LA": "WEST LOS ANGELES", "N HOLLYWOOD": "NORTH HOLLYWOOD"}, inplace=True)
 
 area_id_map = {}
@@ -48,14 +45,11 @@ app.layout = html.Div([
     html.Div([html.H1("Criminal Activity in LA City 2010-Present", style={"text-align": "center"}),
               dcc.Dropdown(id="select_cat",
                            options=[
-                               {"label": "Arrests", "value": "Arrests"},
-                               {"label": "Arrests_Per_10k_Pop", "value": "Arrests_Per_10k_Pop"},
-                               {"label": "Arrests_Per_SqMile", "value": "Arrests_Per_SqMile"},
                                {"label": "Reports", "value": "Reports"},
                                {"label": "Reports_Per_10k_Pop", "value": "Reports_Per_10k_Pop"},
                                {"label": "Reports_Per_SqMile", "value": "Reports_Per_SqMile"}],
                            multi=False,
-                           value="Arrests",
+                           value="Reports",
                            style={"width": "40%"}
                            ),
               dcc.Dropdown(id="select_group",
@@ -93,7 +87,15 @@ app.layout = html.Div([
                            ),
               html.Br(),
               dcc.RangeSlider(2010, 2023, 1, count=1,
-                              marks={2018: "2018",
+                              marks={2010: "2010",
+                                     2011: "2011",
+                                     2012: "2012",
+                                     2013: "2013",
+                                     2014: "2014",
+                                     2015: "2015",
+                                     2016: "2016",
+                                     2017: "2017",
+                                     2018: "2018",
                                      2019: "2019",
                                      2020: "2020",
                                      2021: "2021",
@@ -167,8 +169,7 @@ def generate_graph(cat_selected, year_selected, group_selected, clickData):
                          (map_info["YEAR"] <= year_selected[1]) &
                          (map_info["CRIME_GROUP"].isin(group_selected))].groupby(
         ["AREA_NAME", "id", "SqMile", "Population"]).aggregate(
-        {"Arrests": "sum", "Reports": "sum", "Arrests_Per_SqMile": "sum", "Arrests_Per_10k_Pop": "sum",
-         "Reports_Per_SqMile": "sum", "Reports_Per_10k_Pop": "sum"}).reset_index()
+        {"Reports": "sum", "Reports_Per_SqMile": "sum", "Reports_Per_10k_Pop": "sum"}).reset_index()
 
     hover = ["Population", "SqMile"]
     hover.append(cat_selected)
@@ -254,22 +255,16 @@ def generate_bar_pct_change(cat_selected, year_selected, group_selected):
 
 @app.callback(
     Output(component_id="title_two", component_property="children"),
-    Input(component_id="select_cat", component_property="value"),
     Input(component_id="select_year", component_property="value"),
     Input(component_id="my_map", component_property="clickData")
 )
-def generate_title_two(cat_selected, year_selected, clickData):
+def generate_title_two(year_selected, clickData):
     if clickData is None:
         area = "TOPANGA"
     else:
         area = json.loads(json.dumps(clickData))["points"][0]["hovertext"]
 
-    if cat_selected in ["Arrests", "Arrests_Per_10k_Pop", "Arrests_Per_SqMile"]:
-        cat = "Arrests"
-    else:
-        cat = "Reports of Crime"
-
-    container = f"Data: {cat} in {area} from {year_selected[0]} to {year_selected[1]}"
+    container = f"Data: Reports of Crime in {area} from {year_selected[0]} to {year_selected[1]}"
 
     return container
 
@@ -281,25 +276,19 @@ def generate_title_two(cat_selected, year_selected, clickData):
     Output(component_id="g4", component_property="figure"),
     Output(component_id="g5", component_property="figure"),
     Output(component_id="g6", component_property="figure"),
-    Input(component_id="select_cat", component_property="value"),
     Input(component_id="select_year", component_property="value"),
     Input(component_id="my_map", component_property="clickData"),
     Input(component_id="select_group", component_property="value")
 )
-def generate_graphs(cat_selected, year_selected, clickData, group_selected):
+def generate_graphs(year_selected, clickData, group_selected):
 
     # Create filter params
     if clickData is None:
         area = "TOPANGA"
     else:
         area = json.loads(json.dumps(clickData))["points"][0]["hovertext"]
-
-    if (cat_selected == "Arrests") or (cat_selected == "Arrests_Per_10k_Pop") or (
-            cat_selected == "Arrests_Per_SqMile"):
-        df = arrest_clean
-    elif (cat_selected == "Reports") or (cat_selected == "Reports_Per_10k_Pop") or (
-            cat_selected == "Reports_Per_SqMile"):
-        df = crime_clean
+    
+    df = crime_clean
 
     # Fiilter data
     df_filtered = pd.DataFrame(df[(df["AREA_NAME"] == area) & (df["YEAR"] >= year_selected[0]) &
@@ -395,4 +384,4 @@ def generate_graphs(cat_selected, year_selected, clickData, group_selected):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=True, jupyter_mode="external")
