@@ -18,6 +18,7 @@ external_stylesheets = {
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'}
 
 app = dash.Dash(__name__)
+server = app.server
 
 # bootstrap themes: bootswatch.com
 
@@ -384,4 +385,4 @@ def generate_graphs(year_selected, clickData, group_selected):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, jupyter_mode="external")
+    app.run_server(debug=False)
